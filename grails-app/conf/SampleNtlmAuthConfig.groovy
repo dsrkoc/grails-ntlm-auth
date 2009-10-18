@@ -10,6 +10,13 @@
  * Plugin accepts all jCIFS configuration properties.
  * See http://jcifs.samba.org/src/docs/ntlmhttpauth.html for more info
  */
+
+/*
+ * Plugin is active by default, set the property 'active' to false to disable it.
+ *
+active = true
+ */
+
 jcifs {
 	http.domainController = 'DC ADDRESS' // ... or use jcifs.netbios.wins
 	smb.client.domain = 'A DOMAIN'

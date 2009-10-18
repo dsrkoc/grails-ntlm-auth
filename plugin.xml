@@ -1,4 +1,4 @@
-<plugin name='ntlm-auth' version='0.4' grailsVersion='1.1 &gt; *'>
+<plugin name='ntlm-auth' version='0.5' grailsVersion='1.1 &gt; *'>
   <author>Dinko Srkoč</author>
   <authorEmail>dinko.srkoc@helix.hr</authorEmail>
   <title>NTLM HTTP Authentication</title>
@@ -8,8 +8,6 @@ See http://jcifs.samba.org for more info.
 </description>
   <documentation>http://grails.org/NtlmAuth+Plugin</documentation>
   <resources>
-    <resource>UrlMappings</resource>
-    <resource>DataSource</resource>
     <resource>SampleNtlmAuthConfig</resource>
   </resources>
   <dependencies />
