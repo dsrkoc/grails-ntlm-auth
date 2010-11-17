@@ -24,7 +24,7 @@ import grails.util.Environment
  */
 class NtlmAuthGrailsPlugin {
     // the plugin version
-    def version = "0.5"
+    def version = "0.6"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.1 > *"
     // the other plugins this plugin depends on
@@ -44,6 +44,10 @@ See http://jcifs.samba.org for more info.
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/NtlmAuth+Plugin"
+
+    // This helps with placing this plugin right after char encoding filter
+    // in filter-mapping part of web.xml
+    def loadBefore = [ 'controllers' ]
 
     def doWithSpring = { }
 
@@ -72,28 +76,20 @@ See http://jcifs.samba.org for more info.
             }
         }
         
-        // The filter needs to go after the Spring char encoding filter (if present) 
-        // and before the sitemesh filter.  Borrowed logic from the Shiro plugin (used to be JSecurity)...
+        // The filter needs to go after the Spring char encoding filter (if present).
+        // Some of the logic here is inspired by the Shiro plugin ...
         def filter = xml.'filter-mapping'.find { it.'filter-name'.text() == "charEncodingFilter" }
 
         if (!filter) {
-            int i = 0
-            int siteMeshIndex = -1
-            xml.'filter-mapping'.each {
-                if (it.'filter-name'.text().equalsIgnoreCase("sitemesh")) {
-                    siteMeshIndex = i
-                }
-                i++
-            }
-
-            if (siteMeshIndex > 0) {
-                filter = xml.'filter-mapping'[siteMeshIndex - 1]
-            } else if (siteMeshIndex == 0 || xml.'filter-mapping'.size() == 0) {
+            def fm = xml.'filter-mapping'
+            if (fm.size() == 0) {
+                /* If there is no char encoding filter we need to use
+                 * the last filter definition as the insertion point. */
                 def filters = xml.'filter'
                 filter = filters[filters.size() - 1]
-            } else {
-                def filterMappings = xml.'filter-mapping'
-                filter = filterMappings[filterMappings.size() - 1]
+            }
+            else {
+                filter = fm[fm.size() - 1]
             }
         }
 
@@ -119,18 +115,18 @@ See http://jcifs.samba.org for more info.
  
         def ntlmCfg = app.config.ntlmAuth ?: [:]       
         def slurper = new ConfigSlurper(Environment.current.name)
-		try {
-			slurper.parse(classLoader.loadClass('NtlmAuthConfig')) + ntlmCfg
-		}
-		catch (e) {
-		    if (ntlmCfg) {
-		        return ntmlCfg
-		    }
-		    else {
-			    println "--> Unable to load NtlmAuthConfig, jCIFS NTLM disabled."
-			    println "--> Maybe you haven't run 'grails install-ntlm-auth-config'."
-			    return false
-		    }
-		}
+        try {
+            slurper.parse(classLoader.loadClass('NtlmAuthConfig')) + ntlmCfg
+        }
+        catch (e) {
+            if (ntlmCfg) {
+                return ntlmCfg
+            }
+            else {
+                println "--> Unable to load NtlmAuthConfig, jCIFS NTLM disabled."
+                println "--> Maybe you haven't run 'grails install-ntlm-auth-config'."
+                return false
+            }
+        }
     }
 }
